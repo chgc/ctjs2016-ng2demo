@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Request } from '@angular/http';
+import { DomSanitizationService } from '@angular/platform-browser';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
 
@@ -8,7 +9,7 @@ export class DataService {
 
   url = '/api/articles.json';
 
-  constructor(private http: Http) { }
+  constructor(private http: Http, private sanitizer: DomSanitizationService) { }
 
   searchArticles(keyword: string) {
     return this.http.get(this.url)
@@ -21,6 +22,10 @@ export class DataService {
         } else {
           return true;
         }
+      })
+      .map((d: any) => {
+        d.summary = this.sanitizer.bypassSecurityTrustHtml(d.summary);
+        return d;
       }).toArray();
   }
 }
